@@ -14,7 +14,7 @@ os.environ['SDL_VIDEO_WINDOW_POS'] = '-1260, 100'
 pygame.init()
 gui = Gui()
 surface = pygame.display.set_mode((800, 800))
-pygame.display.set_caption('Skycrappers')
+pygame.display.set_caption('Skyscrappers')
 programIcon = pygame.image.load('sk.png')
 pygame.display.set_icon(programIcon)
 
