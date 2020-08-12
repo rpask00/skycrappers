@@ -1,6 +1,3 @@
-import time
-from ttictoc import TicToc
-import timeit
 import pygame.freetype  # Import the freetype module.
 import copy
 import functools
@@ -67,7 +64,6 @@ class Puzzle():
                 running = False
 
     def insert_row(self, id, row, city):
-        # time.sleep(.005)
         self.pygame_draw(id, row, city)
         if id < 6:
             for i, r in enumerate(row):
@@ -187,6 +183,18 @@ class Puzzle():
         self.solve(self.city, 0)
         return tuple([tuple(c) for c in self.city])
 
+    def get_current_aligment(self, id, city):
+        is_horizontal = id > 5
+
+        if is_horizontal:
+            return city[id % 6]
+
+        row = []
+        for c in city:
+            row.append(c[id])
+
+        return row
+
     def solve(self, city, id):
         self.count += 1
         if id == len(self.merged):
@@ -199,15 +207,27 @@ class Puzzle():
 
         m = self.merged[id]
 
-        for c in m['combinations']:
-            if self.validate_city(city, c, m['id'] % 6, m['is_horizontal']):
-                fake_City = self.insert_row(m['id'], c, copy.deepcopy(city))
-                if not self.validate_city_all(fake_City):
+        current = self.get_current_aligment(m['id'], city)
+
+        def filtr(row):
+            for i, row in enumerate(row):
+                if current[i] is 0:
                     continue
 
-                if self.solve(fake_City, id + 1):
-                    return True
+                if current[i] is not row:
+                    return False
 
+            return True
+
+        # for c in m['combinations']:
+        for c in filter(filtr, m['combinations']):
+            # if self.validate_city(city, c, m['id'] % 6, m['is_horizontal']):
+            fake_City = self.insert_row(m['id'], c, copy.deepcopy(city))
+            # if not self.validate_city_all(fake_City):
+            #     continue
+
+            if self.solve(fake_City, id + 1):
+                return True
         return False
 
     def solve_after(self, city):
@@ -263,10 +283,10 @@ clues = [
     # (5, 4, 1, 2, 3, 4, 4, 3, 2, 5, 1, 5, 2, 2, 2, 2, 3, 1, 1, 3, 2, 3, 3, 3),
     # (4, 4, 0, 3, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 6, 3, 0, 0, 4, 0, 0, 0, 0),
     # (2, 2, 2, 2, 3, 1, 1, 3, 2, 3, 3, 3, 5, 4, 1, 2, 3, 4, 4, 3, 2, 5, 1, 5),
-    # (1, 3, 2, 3, 3, 3, 5, 4, 1, 2, 3, 4, 4, 3, 2, 5, 1, 5, 2, 2, 2, 2, 3, 1),
+    (1, 3, 2, 3, 3, 3, 5, 4, 1, 2, 3, 4, 4, 3, 2, 5, 1, 5, 2, 2, 2, 2, 3, 1),
     # (0, 0, 0, 6, 3, 0, 0, 4, 0, 0, 0, 0, 4, 4, 0, 3, 0, 0, 0, 0, 0, 2, 2, 0),
     # (3, 2, 0, 3, 1, 0, 0, 3, 0, 5, 3, 4, 0, 0, 0, 0, 0, 1, 0, 3, 0, 3, 2, 3),
-    (0, 3, 0, 3, 2, 3, 3, 2, 0, 3, 1, 0, 0, 3, 0, 5, 3, 4, 0, 0, 0, 0, 0, 1),
+    # (0, 3, 0, 3, 2, 3, 3, 2, 0, 3, 1, 0, 0, 3, 0, 5, 3, 4, 0, 0, 0, 0, 0, 1),
     # (0, 4, 0, 0, 0, 0, 4, 4, 0, 3, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 6, 3, 0),
     # (0, 0, 0, 0, 0, 1, 0, 3, 0, 3, 2, 3, 3, 2, 0, 3, 1, 0, 0, 3, 0, 5, 3, 4),
     # (5, 1, 2, 2, 4, 3, 3, 2, 1, 2, 2, 4, 3, 2, 2, 3, 2, 1, 1, 2, 3, 3, 2, 2),
